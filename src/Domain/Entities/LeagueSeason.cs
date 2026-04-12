@@ -46,18 +46,46 @@ public class LeagueSeason : IIdentifiable
     public ICollection<Match> Matches { get; set; } = new List<Match>();
     
     /// <summary>
+    /// Number of top-placed players to display as promoted. Zero means no promotion icons are shown.
+    /// </summary>
+    public int PromotionCount { get; set; }
+
+    /// <summary>
+    /// Number of bottom-placed players to display as relegated. Zero means no relegation icons are shown.
+    /// </summary>
+    public int RelegationCount { get; set; }
+
+    /// <summary>
+    /// Number of places directly below the promotion zone to display as playoff promotion. Zero means no playoff promotion icons are shown.
+    /// </summary>
+    public int PlayoffPromotionCount { get; set; }
+
+    /// <summary>
+    /// Number of places directly above the relegation zone to display as playoff relegation. Zero means no playoff relegation icons are shown.
+    /// </summary>
+    public int PlayoffRelegationCount { get; set; }
+
+    /// <summary>
     /// Factory method for LeagueSeason.
     /// </summary>
     /// <param name="league">Associated league.</param>
     /// <param name="season">Associated Season.</param>
+    /// <param name="promotionCount">Number of promoted places (default 0).</param>
+    /// <param name="relegationCount">Number of relegated places (default 0).</param>
+    /// <param name="playoffPromotionCount">Number of playoff promotion places (default 0).</param>
+    /// <param name="playoffRelegationCount">Number of playoff relegation places (default 0).</param>
     /// <returns></returns>
-    public static LeagueSeason Create(League league, Season season)
+    public static LeagueSeason Create(League league, Season season, int promotionCount = 0, int relegationCount = 0, int playoffPromotionCount = 0, int playoffRelegationCount = 0)
         => new LeagueSeason
         {
             Id = Guid.CreateVersion7(),
             League = league,
             LeagueId = league.Id,
             Season = season,
-            SeasonId = season.Id
+            SeasonId = season.Id,
+            PromotionCount = promotionCount,
+            RelegationCount = relegationCount,
+            PlayoffPromotionCount = playoffPromotionCount,
+            PlayoffRelegationCount = playoffRelegationCount
         };
 }

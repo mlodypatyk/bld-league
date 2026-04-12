@@ -23,7 +23,9 @@ public class LeagueSeasonRepository(AppDbContext context) :
                 SeasonNumber = ls.Season.SeasonNumber,
                 SeasonName =  ls.Season.SeasonName,
                 SeasonId = ls.SeasonId,
-                UserCount = ls.LeagueSeasonUsers.Count
+                UserCount = ls.LeagueSeasonUsers.Count,
+                PromotionCount = ls.PromotionCount,
+                RelegationCount = ls.RelegationCount
             })
             .ToListAsync();
 
@@ -40,7 +42,9 @@ public class LeagueSeasonRepository(AppDbContext context) :
                 SeasonNumber = ls.Season.SeasonNumber,
                 SeasonName = ls.Season.SeasonName,
                 SeasonId = ls.SeasonId,
-                UserCount = ls.LeagueSeasonUsers.Count
+                UserCount = ls.LeagueSeasonUsers.Count,
+                PromotionCount = ls.PromotionCount,
+                RelegationCount = ls.RelegationCount
             })
             .ToListAsync();
 
@@ -56,7 +60,11 @@ public class LeagueSeasonRepository(AppDbContext context) :
                 SeasonNumber = ls.Season.SeasonNumber,
                 SeasonName = ls.Season.SeasonName,
                 SeasonId = ls.SeasonId,
-                UserCount = ls.LeagueSeasonUsers.Count
+                UserCount = ls.LeagueSeasonUsers.Count,
+                PromotionCount = ls.PromotionCount,
+                RelegationCount = ls.RelegationCount,
+                PlayoffPromotionCount = ls.PlayoffPromotionCount,
+                PlayoffRelegationCount = ls.PlayoffRelegationCount
             })
             .FirstOrDefaultAsync();
 
@@ -65,11 +73,16 @@ public class LeagueSeasonRepository(AppDbContext context) :
             .Where(ls => ls.SeasonId == seasonId && ls.LeagueId == leagueId)
             .Select(ls => new LeagueSeasonDetailDto
             {
+                PromotionCount = ls.PromotionCount,
+                RelegationCount = ls.RelegationCount,
+                PlayoffPromotionCount = ls.PlayoffPromotionCount,
+                PlayoffRelegationCount = ls.PlayoffRelegationCount,
                 Standings = ls.LeagueSeasonStandings
                     .OrderBy(lss => lss.Place)
                     .ThenBy(lss => lss.User.FullName)
                     .Select(lss => new LeagueSeasonStandingDto
                     {
+                        UserId = lss.UserId,
                         UserFullName = lss.User.FullName,
                         Place = lss.Place,
                         SubleagueGroup = ls.LeagueSeasonUsers

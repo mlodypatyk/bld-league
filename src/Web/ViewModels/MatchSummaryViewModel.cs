@@ -5,6 +5,8 @@ namespace BldLeague.Web.ViewModels;
 public class MatchSummaryViewModel
 {
     public Guid MatchId { get; set; }
+    public Guid UserAId { get; set; }
+    public Guid? UserBId { get; set; }
     public required string UserAFullName { get; set; }
     public string? UserBFullName { get; set; }
     public int UserAScore { get; set; }
@@ -16,15 +18,17 @@ public class MatchSummaryViewModel
     public static MatchSummaryViewModel FromDto(MatchSummaryDto dto)
     {
         var now = DateTime.UtcNow;
-        var status = dto.RoundEndDate < now
+        var status = now.Date > dto.RoundEndDate.Date
             ? MatchStatus.Finished
-            : dto.RoundStartDate <= now
+            : now.Date >= dto.RoundStartDate.Date
                 ? MatchStatus.InProgress
                 : MatchStatus.Upcoming;
 
         return new MatchSummaryViewModel
         {
             MatchId = dto.Id,
+            UserAId = dto.UserAId,
+            UserBId = dto.UserBId,
             UserAFullName = dto.UserAFullName,
             UserBFullName = dto.UserBFullName,
             UserAScore = dto.UserAScore,

@@ -128,7 +128,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 
 - **Season** → contains **Rounds** and belongs to multiple **LeagueSeasons**.
 - **League** → a division (e.g., "Liga A"). Multiple leagues run simultaneously within a season.
-- **LeagueSeason** → junction of League + Season; holds the roster (`LeagueSeasonUser`). Users can be assigned a `SubleagueGroup` (integer) on their `LeagueSeasonUser` record to split the league into subleagues during a revenge period.
+- **LeagueSeason** → junction of League + Season; holds the roster (`LeagueSeasonUser`). Users can be assigned a `SubleagueGroup` (integer) on their `LeagueSeasonUser` record to split the league into subleagues during a revenge period. Has `PromotionCount`, `RelegationCount`, `PlayoffPromotionCount`, and `PlayoffRelegationCount` (all int, default 0) — when non-zero, the public standings view renders zone icons: filled green ↑ (Awans), outlined yellow ↑ (Baraż), outlined yellow ↓ (Baraż), filled red ↓ (Spadek). Purely visual.
 - **Season** has no start/end dates — it is just a `SeasonNumber`. "Latest season" (highest `SeasonNumber`) is used as the UI default in AddRound and AddMatch. LeagueSeasons are created manually (not auto-generated).
 - **Match** → 1v1 within a Round + League. Each match has exactly 5 solves (`Match.SOLVES_PER_MATCH`) per player. Scoring: 1 point per solve won + 1 bonus point for best single. Scores are computed and stored at match creation time. Matches have a `MatchStatus` (Upcoming/InProgress/Finished) derived from the round's `StartDate`/`EndDate` relative to `DateTime.UtcNow`; scores and solve details are hidden in the UI until the match is Finished.
 - **Scramble** → one per solve position (1–`Match.SOLVES_PER_MATCH`) per round; shared across all leagues in that round. Field `Notation` holds the move sequence. A round may have 0–5 scrambles.
@@ -151,6 +151,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `Scramble` entity | `src/Domain/Entities/Scramble.cs` |
 | `RoundStanding` entity | `src/Domain/Entities/RoundStanding.cs` |
 | `LeagueSeasonStanding` entity | `src/Domain/Entities/LeagueSeasonStanding.cs` |
+| `PlayerRanking` entity | `src/Domain/Entities/PlayerRanking.cs` |
 | `User` entity | `src/Domain/Entities/User.cs` |
 | `SolveResult` value object | `src/Domain/ValueObjects/SolveResult.cs` |
 | `AverageCalculator` (Ao5 logic) | `src/Domain/Scoring/AverageCalculator.cs` |
@@ -188,6 +189,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `IRoundStandingRepository` | `src/Application/Abstractions/Repositories/IRoundStandingRepository.cs` |
 | `ILeagueSeasonStandingRepository` | `src/Application/Abstractions/Repositories/ILeagueSeasonStandingRepository.cs` |
 | `IUserRepository` | `src/Application/Abstractions/Repositories/IUserRepository.cs` |
+| `IPlayerRankingRepository` | `src/Application/Abstractions/Repositories/IPlayerRankingRepository.cs` |
 
 ### Application — commands (write operations, by feature)
 
@@ -196,12 +198,14 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | League create/update/delete/import | `src/Application/Commands/Leagues/` |
 | Season create/edit/delete/import | `src/Application/Commands/Seasons/` |
 | LeagueSeason create/delete/import | `src/Application/Commands/LeagueSeasons/` |
+| LeagueSeason update settings (promotion/relegation/playoff counts) | `src/Application/Commands/LeagueSeasons/Update/` |
 | LeagueSeasonUser add/remove/import/set-group | `src/Application/Commands/LeagueSeasonUsers/` |
 | Round create/update/delete/import + scramble update | `src/Application/Commands/Rounds/` |
 | Match create/edit/delete/import | `src/Application/Commands/Matches/` |
 | User create/update/delete/import | `src/Application/Commands/Users/` |
 | Refresh round standings (single + refresh-all) | `src/Application/Commands/RoundStandings/Refresh/` and `RefreshAll/` |
 | Refresh season standings (single + refresh-all) | `src/Application/Commands/LeagueSeasonStandings/Refresh/` and `RefreshAll/` |
+| Refresh player rankings | `src/Application/Commands/PlayerRankings/Refresh/` |
 
 ### Application — queries (read operations, by feature)
 
@@ -213,6 +217,12 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Round queries + DTOs (incl. `ScrambleDto`, `RoundSummaryDto`) | `src/Application/Queries/Rounds/` |
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
+| Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |
+| Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |
+| User round results | `src/Application/Queries/Users/GetRoundResults/` |
+| User match history | `src/Application/Queries/Users/GetMatchHistory/` |
+| User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
+| User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
 
 ### Infrastructure
 
@@ -239,6 +249,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Shared layout | `src/Web/Pages/Shared/_Layout.cshtml` |
 | `CsvHelper` (CSV builder, UTF-8 BOM) | `src/Web/Helpers/CsvHelper.cs` |
 | `CsvParser` (CSV `IFormFile` parser) | `src/Web/Helpers/CsvParser.cs` |
+| `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
@@ -252,6 +263,9 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | View round results | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
+| Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
+| User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
+| User profile | `src/Web/Pages/Users/UserProfile.cshtml[.cs]` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 2 guidelines | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 1 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason1.cshtml[.cs]` |
@@ -267,6 +281,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Edit LeagueSeason roster (+ user CSV import/export) | `src/Web/Pages/Admin/LeagueSeasons/EditLeagueSeason.cshtml[.cs]` |
 | Matches list / add / edit | `src/Web/Pages/Admin/Matches/` |
 | Users list / add / edit | `src/Web/Pages/Admin/Users/` |
+| Rankings refresh | `src/Web/Pages/Admin/Rankings/Rankings.cshtml[.cs]` |
 
 ## Common Tasks
 

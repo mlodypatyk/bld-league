@@ -54,6 +54,30 @@ namespace BldLeague.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("league_id");
 
+                    b.Property<int>("PlayoffPromotionCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("playoff_promotion_count");
+
+                    b.Property<int>("PlayoffRelegationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("playoff_relegation_count");
+
+                    b.Property<int>("PromotionCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("promotion_count");
+
+                    b.Property<int>("RelegationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("relegation_count");
+
                     b.Property<Guid>("SeasonId")
                         .HasColumnType("uuid")
                         .HasColumnName("season_id");
@@ -236,6 +260,76 @@ namespace BldLeague.Infrastructure.Migrations
                         .HasDatabaseName("ix_matches_user_b_id");
 
                     b.ToTable("matches", (string)null);
+                });
+
+            modelBuilder.Entity("BldLeague.Domain.Entities.PlayerRanking", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int?>("AverageRank")
+                        .HasColumnType("integer")
+                        .HasColumnName("average_rank");
+
+                    b.Property<Guid?>("AverageRoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("average_round_id");
+
+                    b.Property<int?>("AverageSolve1")
+                        .HasColumnType("integer")
+                        .HasColumnName("average_solve1");
+
+                    b.Property<int?>("AverageSolve2")
+                        .HasColumnType("integer")
+                        .HasColumnName("average_solve2");
+
+                    b.Property<int?>("AverageSolve3")
+                        .HasColumnType("integer")
+                        .HasColumnName("average_solve3");
+
+                    b.Property<int?>("AverageSolve4")
+                        .HasColumnType("integer")
+                        .HasColumnName("average_solve4");
+
+                    b.Property<int?>("AverageSolve5")
+                        .HasColumnType("integer")
+                        .HasColumnName("average_solve5");
+
+                    b.Property<int?>("BestAverage")
+                        .HasColumnType("integer")
+                        .HasColumnName("best_average");
+
+                    b.Property<int?>("BestSingle")
+                        .HasColumnType("integer")
+                        .HasColumnName("best_single");
+
+                    b.Property<int?>("SingleRank")
+                        .HasColumnType("integer")
+                        .HasColumnName("single_rank");
+
+                    b.Property<Guid?>("SingleRoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("single_round_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_rankings");
+
+                    b.HasIndex("AverageRoundId")
+                        .HasDatabaseName("ix_player_rankings_average_round_id");
+
+                    b.HasIndex("SingleRoundId")
+                        .HasDatabaseName("ix_player_rankings_single_round_id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_player_rankings_user_id");
+
+                    b.ToTable("PlayerRankings", (string)null);
                 });
 
             modelBuilder.Entity("BldLeague.Domain.Entities.Round", b =>
@@ -568,6 +662,34 @@ namespace BldLeague.Infrastructure.Migrations
                     b.Navigation("UserB");
                 });
 
+            modelBuilder.Entity("BldLeague.Domain.Entities.PlayerRanking", b =>
+                {
+                    b.HasOne("BldLeague.Domain.Entities.Round", "AverageRound")
+                        .WithMany()
+                        .HasForeignKey("AverageRoundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_player_rankings_round_average_round_id");
+
+                    b.HasOne("BldLeague.Domain.Entities.Round", "SingleRound")
+                        .WithMany()
+                        .HasForeignKey("SingleRoundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_player_rankings_round_single_round_id");
+
+                    b.HasOne("BldLeague.Domain.Entities.User", "User")
+                        .WithOne("PlayerRanking")
+                        .HasForeignKey("BldLeague.Domain.Entities.PlayerRanking", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_player_rankings_user_user_id");
+
+                    b.Navigation("AverageRound");
+
+                    b.Navigation("SingleRound");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BldLeague.Domain.Entities.Round", b =>
                 {
                     b.HasOne("BldLeague.Domain.Entities.Season", "Season")
@@ -689,6 +811,8 @@ namespace BldLeague.Infrastructure.Migrations
                     b.Navigation("MatchesAsUserA");
 
                     b.Navigation("MatchesAsUserB");
+
+                    b.Navigation("PlayerRanking");
 
                     b.Navigation("RoundStandings");
 

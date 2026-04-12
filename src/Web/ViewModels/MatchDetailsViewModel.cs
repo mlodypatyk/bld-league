@@ -32,9 +32,9 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
     public static MatchDetailsViewModel FromDto(MatchDetailsDto dto)
     {
         var now = DateTime.UtcNow;
-        var status = dto.RoundEndDate < now
+        var status = now.Date > dto.RoundEndDate.Date
             ? MatchStatus.Finished
-            : dto.RoundStartDate <= now
+            : now.Date >= dto.RoundStartDate.Date
                 ? MatchStatus.InProgress
                 : MatchStatus.Upcoming;
 
@@ -42,6 +42,8 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
         {
             MatchName = $"{dto.UserAFullName} - {dto.UserBFullName ?? string.Empty}",
             MatchId = dto.Id,
+            UserAId = dto.UserAId,
+            UserBId = dto.UserBId,
             SeasonId = dto.SeasonId,
             LeagueId = dto.LeagueId,
             RoundNumber = dto.RoundNumber,

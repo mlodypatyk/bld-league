@@ -68,6 +68,8 @@ public class MatchRepository(AppDbContext context)
             .Select(m => new MatchDetailsDto
             {
                 Id = m.Id,
+                UserAId = m.UserAId,
+                UserBId = m.UserBId,
                 SeasonId = m.LeagueSeason.SeasonId,
                 LeagueId = m.LeagueSeason.LeagueId,
                 RoundNumber = m.Round.RoundNumber,
@@ -120,6 +122,8 @@ public class MatchRepository(AppDbContext context)
             .Select(m => new MatchSummaryDto
             {
                 Id = m.Id,
+                UserAId = m.UserAId,
+                UserBId = m.UserBId,
                 UserAFullName = m.UserA.FullName,
                 UserBFullName = m.UserB != null ? m.UserB.FullName : null,
                 UserAScore = m.UserAScore,

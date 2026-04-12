@@ -74,6 +74,7 @@ public class LeagueSeasonRepository(AppDbContext context) :
                     .ThenBy(lss => lss.User.FullName)
                     .Select(lss => new LeagueSeasonStandingDto
                     {
+                        UserId = lss.UserId,
                         UserFullName = lss.User.FullName,
                         Place = lss.Place,
                         SubleagueGroup = ls.LeagueSeasonUsers

@@ -194,7 +194,16 @@
                                         <span>@match.ProfileUserScore : @match.OpponentScore</span>
                                     }
                                 </td>
-                                <td>@(match.OpponentFullName ?? "BYE")</td>
+                                <td>
+                                    @if (match.OpponentId.HasValue)
+                                    {
+                                        <a asp-page="/Users/UserProfile" asp-route-id="@match.OpponentId">@match.OpponentFullName</a>
+                                    }
+                                    else
+                                    {
+                                        @(match.OpponentFullName ?? "BYE")
+                                    }
+                                </td>
                                 <td>
                                     <a class="btn btn-sm btn-primary" asp-page="/Matches/ViewMatch" asp-route-id="@match.MatchId">Zobacz</a>
                                 </td>

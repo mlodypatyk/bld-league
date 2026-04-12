@@ -18,6 +18,7 @@ public class GetUserMatchHistoryRequestHandler(IUnitOfWork unitOfWork)
                 string? opponentFullName = isUserA ? m.UserB?.FullName : m.UserA.FullName;
                 int profileUserScore = isUserA ? m.UserAScore : m.UserBScore;
                 int opponentScore = isUserA ? m.UserBScore : m.UserAScore;
+                Guid? opponentId = isUserA ? m.UserBId : m.UserAId;
 
                 return new UserMatchHistoryDto(
                     m.Id,
@@ -30,7 +31,8 @@ public class GetUserMatchHistoryRequestHandler(IUnitOfWork unitOfWork)
                     profileUserFullName,
                     opponentFullName,
                     profileUserScore,
-                    opponentScore
+                    opponentScore,
+                    opponentId
                 );
             })
             .ToList();

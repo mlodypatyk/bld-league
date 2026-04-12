@@ -11,5 +11,6 @@ public record UserMatchHistoryDto(
     string ProfileUserFullName,
     string? OpponentFullName,
     int ProfileUserScore,
-    int OpponentScore
+    int OpponentScore,
+    Guid? OpponentId
 );

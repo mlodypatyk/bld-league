@@ -1,0 +1,177 @@
+@page "/Rankings"
+@using BldLeague.Application.Queries.PlayerRankings.GetPlayerRankings
+@model BldLeague.Web.Pages.Rankings.Rankings
+
+<div class="container mt-2">
+    <h2>Rankingi</h2>
+
+    <ul class="nav nav-tabs mb-3" id="rankingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="single-tab" data-bs-toggle="tab" data-bs-target="#single-tab-pane"
+                    type="button" role="tab" aria-controls="single-tab-pane" aria-selected="true">
+                Single
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="average-tab" data-bs-toggle="tab" data-bs-target="#average-tab-pane"
+                    type="button" role="tab" aria-controls="average-tab-pane" aria-selected="false">
+                Średnia
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="rankingTabContent">
+        <div class="tab-pane fade show active" id="single-tab-pane" role="tabpanel" aria-labelledby="single-tab" tabindex="0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center text-nowrap">#</th>
+                            <th scope="col">Imię i nazwisko</th>
+                            <th scope="col" class="text-nowrap">Wynik</th>
+                            <th scope="col" class="text-nowrap">Kolejka</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.SingleRankings.Any())
+                    {
+                        foreach (var r in Model.SingleRankings)
+                        {
+                            <tr>
+                                <td class="text-center text-nowrap">@r.SingleRank</td>
+                                <td>@r.FullName</td>
+                                <td class="fw-bold text-nowrap">@r.BestSingle</td>
+                                <td class="text-nowrap">
+                                    <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@r.SeasonId" asp-route-RoundNumber="@r.RoundNumber">
+                                        <span class="d-none d-md-inline">@r.RoundLabel</span>
+                                        <span class="d-inline d-md-none">S@(r.SeasonNumber) K@(r.RoundNumber)</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center">Brak danych.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="average-tab-pane" role="tabpanel" aria-labelledby="average-tab" tabindex="0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col">Imię i nazwisko</th>
+                            <th scope="col">Wynik</th>
+                            <th scope="col">Kolejka</th>
+                            <th scope="col" class="d-none d-md-table-cell">Ułożenia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.AverageRankings.Any())
+                    {
+                        foreach (var r in Model.AverageRankings)
+                        {
+                            <tr class="js-avg-row"
+                                data-rank="@r.AverageRank"
+                                data-name="@r.FullName"
+                                data-result="@r.BestAverage"
+                                data-round="@r.RoundLabel"
+                                data-s1="@Rankings.FormatSolveWithParens(r, 0)"
+                                data-s2="@Rankings.FormatSolveWithParens(r, 1)"
+                                data-s3="@Rankings.FormatSolveWithParens(r, 2)"
+                                data-s4="@Rankings.FormatSolveWithParens(r, 3)"
+                                data-s5="@Rankings.FormatSolveWithParens(r, 4)">
+                                <td class="text-center">@r.AverageRank</td>
+                                <td>@r.FullName</td>
+                                <td class="fw-bold">@r.BestAverage</td>
+                                <td>
+                                    <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@r.SeasonId" asp-route-RoundNumber="@r.RoundNumber">
+                                        <span class="d-none d-md-inline">@r.RoundLabel</span>
+                                        <span class="d-inline d-md-none">S@(r.SeasonNumber) K@(r.RoundNumber)</span>
+                                    </a>
+                                </td>
+                                <td class="font-monospace d-none d-md-table-cell">
+                                    @Rankings.FormatSolveWithParens(r, 0)
+                                    @Rankings.FormatSolveWithParens(r, 1)
+                                    @Rankings.FormatSolveWithParens(r, 2)
+                                    @Rankings.FormatSolveWithParens(r, 3)
+                                    @Rankings.FormatSolveWithParens(r, 4)
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">Brak danych.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="avgRowDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Szczegóły zawodnika</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body" id="avgRowDetailBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('avgRowDetailModal'));
+            const modalBody = document.getElementById('avgRowDetailBody');
+
+            function buildDetailDl(fields) {
+                const dl = document.createElement('dl');
+                dl.className = 'row mb-0';
+                fields.forEach(function ([label, value]) {
+                    const dt = document.createElement('dt');
+                    dt.className = 'col-5';
+                    dt.textContent = label;
+                    const dd = document.createElement('dd');
+                    dd.className = 'col-7';
+                    dd.textContent = value;
+                    dl.appendChild(dt);
+                    dl.appendChild(dd);
+                });
+                return dl;
+            }
+
+            document.querySelectorAll('tr.js-avg-row').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    if (window.innerWidth >= 768) return;
+                    const d = row.dataset;
+                    modalBody.innerHTML = '';
+                    modalBody.appendChild(buildDetailDl([
+                        ['Zawodnik', d.name],
+                        ['Pozycja', d.rank],
+                        ['Wynik', d.result],
+                        ['Kolejka', d.round],
+                        ['Ułożenie 1', d.s1],
+                        ['Ułożenie 2', d.s2],
+                        ['Ułożenie 3', d.s3],
+                        ['Ułożenie 4', d.s4],
+                        ['Ułożenie 5', d.s5]
+                    ]));
+                    modal.show();
+                });
+            });
+        });
+    </script>
+}

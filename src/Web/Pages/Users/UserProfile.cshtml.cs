@@ -12,7 +12,7 @@ namespace BldLeague.Web.Pages.Users;
 
 public class UserProfile(IMediator mediator) : PageModel
 {
-    public new UserSummaryDto? User { get; set; }
+    public UserSummaryDto? Profile { get; set; }
     public PlayerRankingDto? Ranking { get; set; }
     public IReadOnlyCollection<UserRoundResultDto> RoundResults { get; set; } = [];
     public IReadOnlyCollection<UserMatchHistoryDto> MatchHistory { get; set; } = [];
@@ -20,8 +20,8 @@ public class UserProfile(IMediator mediator) : PageModel
 
     public async Task<IActionResult> OnGet(Guid id)
     {
-        User = await mediator.Send(new GetUserByIdRequest { UserId = id });
-        if (User == null)
+        Profile = await mediator.Send(new GetUserByIdRequest { UserId = id });
+        if (Profile == null)
             return NotFound();
 
         Ranking = await mediator.Send(new GetPlayerRankingByUserIdRequest { UserId = id });

@@ -1,7 +1,6 @@
+using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Matches.GetMatchDetailsById;
-using BldLeague.Application.Queries.Matches.GetMatchSummaries;
 using BldLeague.Domain.Entities;
-using System.Linq;
 
 namespace BldLeague.Web.ViewModels;
 
@@ -29,17 +28,8 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
     /// </summary>
     public required List<string?> Scrambles { get; set; }
 
-    public static MatchDetailsViewModel FromDto(MatchDetailsDto dto)
+    public static MatchDetailsViewModel FromDto(MatchDetailsDto dto, RoundClock clock)
     {
-        var now = DateTime.UtcNow;
-        MatchStatus status;
-        if (now > dto.RoundEndDate || dto.BothSidesSubmitted)
-            status = MatchStatus.Finished;
-        else if (now >= dto.RoundStartDate)
-            status = MatchStatus.InProgress;
-        else
-            status = MatchStatus.Upcoming;
-
         return new MatchDetailsViewModel
         {
             MatchName = $"{dto.UserAFullName} - {dto.UserBFullName ?? string.Empty}",
@@ -53,7 +43,7 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
             UserBFullName = dto.UserBFullName,
             UserAScore = dto.UserAScore,
             UserBScore = dto.UserBScore,
-            Status = status,
+            Status = ComputeStatus(clock, dto.RoundStartDate, dto.RoundEndDate, dto.BothSidesSubmitted),
             SeasonName = dto.SeasonName,
             LeagueName = dto.LeagueName,
             RoundName = dto.RoundName,

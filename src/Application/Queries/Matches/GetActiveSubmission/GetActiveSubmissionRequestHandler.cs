@@ -1,16 +1,16 @@
 using BldLeague.Application.Abstractions.Repositories;
+using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Rounds.GetScrambles;
 using MediatR;
 
 namespace BldLeague.Application.Queries.Matches.GetActiveSubmission;
 
-public class GetActiveSubmissionRequestHandler(IUnitOfWork unitOfWork)
+public class GetActiveSubmissionRequestHandler(IUnitOfWork unitOfWork, RoundClock roundClock)
     : IRequestHandler<GetActiveSubmissionRequest, ActiveSubmissionDto?>
 {
     public async Task<ActiveSubmissionDto?> Handle(GetActiveSubmissionRequest request, CancellationToken cancellationToken)
     {
-        var utcNow = DateTime.UtcNow;
-        var match = await unitOfWork.MatchRepository.GetActiveMatchForUserAsync(request.UserId, utcNow);
+        var match = await unitOfWork.MatchRepository.GetActiveMatchForUserAsync(request.UserId, roundClock.LocalToday());
         if (match == null)
             return null;
 

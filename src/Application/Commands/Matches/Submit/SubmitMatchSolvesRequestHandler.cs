@@ -6,7 +6,7 @@ using MediatR;
 
 namespace BldLeague.Application.Commands.Matches.Submit;
 
-public class SubmitMatchSolvesRequestHandler(IUnitOfWork unitOfWork)
+public class SubmitMatchSolvesRequestHandler(IUnitOfWork unitOfWork, RoundClock roundClock)
     : IRequestHandler<SubmitMatchSolvesRequest, CommandResult>
 {
     public async Task<CommandResult> Handle(SubmitMatchSolvesRequest request, CancellationToken cancellationToken)
@@ -15,8 +15,7 @@ public class SubmitMatchSolvesRequestHandler(IUnitOfWork unitOfWork)
         if (user == null)
             return CommandResult.FailGeneral("Nie znaleziono użytkownika.");
 
-        var utcNow = DateTime.UtcNow;
-        var match = await unitOfWork.MatchRepository.GetActiveMatchForUserAsync(request.UserId, utcNow);
+        var match = await unitOfWork.MatchRepository.GetActiveMatchForUserAsync(request.UserId, roundClock.LocalToday());
         if (match == null)
             return CommandResult.FailGeneral("Brak aktywnego meczu do wgrania wyników.");
 
@@ -36,9 +35,9 @@ public class SubmitMatchSolvesRequestHandler(IUnitOfWork unitOfWork)
         await MatchSolvesProcessor.ReplaceUserSolvesAsync(unitOfWork, match, request.UserId, solveResults);
 
         if (match.UserAId == request.UserId)
-            match.UserASubmittedAt = utcNow;
+            match.UserASubmittedAt = DateTime.UtcNow;
         else
-            match.UserBSubmittedAt = utcNow;
+            match.UserBSubmittedAt = DateTime.UtcNow;
 
         unitOfWork.MatchRepository.Update(match);
 

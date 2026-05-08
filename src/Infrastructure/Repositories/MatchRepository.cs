@@ -174,7 +174,7 @@ public class MatchRepository(AppDbContext context)
             .ToListAsync();
     }
 
-    public async Task<Match?> GetActiveMatchForUserAsync(Guid userId, DateTime utcNow)
+    public async Task<Match?> GetActiveMatchForUserAsync(Guid userId, DateTime localToday)
         => await DbSet
             .Include(m => m.Round).ThenInclude(r => r.Season)
             .Include(m => m.Round).ThenInclude(r => r.Scrambles)
@@ -183,7 +183,7 @@ public class MatchRepository(AppDbContext context)
             .Include(m => m.UserB)
             .Include(m => m.Solves)
             .Where(m => (m.UserAId == userId || m.UserBId == userId)
-                        && m.Round.StartDate <= utcNow
-                        && m.Round.EndDate >= utcNow)
+                        && m.Round.StartDate <= localToday
+                        && m.Round.EndDate >= localToday)
             .FirstOrDefaultAsync();
 }

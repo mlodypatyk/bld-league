@@ -1,5 +1,5 @@
 using BldLeague.Application.Commands.RoundStandings.RefreshAll;
-using BldLeague.Infrastructure.Options;
+using BldLeague.Application.Common;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

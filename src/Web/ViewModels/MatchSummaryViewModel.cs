@@ -1,3 +1,4 @@
+using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Matches.GetMatchSummaries;
 
 namespace BldLeague.Web.ViewModels;
@@ -15,17 +16,8 @@ public class MatchSummaryViewModel
 
     protected MatchSummaryViewModel() {}
 
-    public static MatchSummaryViewModel FromDto(MatchSummaryDto dto)
+    public static MatchSummaryViewModel FromDto(MatchSummaryDto dto, RoundClock clock)
     {
-        var now = DateTime.UtcNow;
-        MatchStatus status;
-        if (now > dto.RoundEndDate || dto.BothSidesSubmitted)
-            status = MatchStatus.Finished;
-        else if (now >= dto.RoundStartDate)
-            status = MatchStatus.InProgress;
-        else
-            status = MatchStatus.Upcoming;
-
         return new MatchSummaryViewModel
         {
             MatchId = dto.Id,
@@ -35,7 +27,16 @@ public class MatchSummaryViewModel
             UserBFullName = dto.UserBFullName,
             UserAScore = dto.UserAScore,
             UserBScore = dto.UserBScore,
-            Status = status,
+            Status = ComputeStatus(clock, dto.RoundStartDate, dto.RoundEndDate, dto.BothSidesSubmitted),
         };
+    }
+
+    protected static MatchStatus ComputeStatus(RoundClock clock, DateTime startDate, DateTime endDate, bool bothSidesSubmitted)
+    {
+        if (clock.IsRoundFinished(endDate) || bothSidesSubmitted)
+            return MatchStatus.Finished;
+        if (clock.IsRoundActive(startDate, endDate))
+            return MatchStatus.InProgress;
+        return MatchStatus.Upcoming;
     }
 }

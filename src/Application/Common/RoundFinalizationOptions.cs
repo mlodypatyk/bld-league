@@ -1,4 +1,4 @@
-namespace BldLeague.Infrastructure.Options;
+namespace BldLeague.Application.Common;
 
 public class RoundFinalizationOptions
 {

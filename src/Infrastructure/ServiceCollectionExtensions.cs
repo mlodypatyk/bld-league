@@ -1,11 +1,12 @@
-﻿using BldLeague.Application.Abstractions.Repositories;
+using BldLeague.Application.Abstractions.Repositories;
+using BldLeague.Application.Common;
 using BldLeague.Infrastructure.Context;
 using BldLeague.Infrastructure.HostedServices;
-using BldLeague.Infrastructure.Options;
 using BldLeague.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace BldLeague.Infrastructure;
 
@@ -21,6 +22,20 @@ public static class ServiceCollectionExtensions
             provider => new UnitOfWork(provider.GetRequiredService<IDbContextFactory<AppDbContext>>()));
 
         services.Configure<RoundFinalizationOptions>(configuration.GetSection(RoundFinalizationOptions.SectionName));
+        services.AddSingleton<RoundClock>(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<RoundFinalizationOptions>>().Value;
+            TimeZoneInfo tz;
+            try
+            {
+                tz = TimeZoneInfo.FindSystemTimeZoneById(options.TimeZoneId);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                tz = TimeZoneInfo.Utc;
+            }
+            return new RoundClock(tz);
+        });
         services.AddHostedService<RoundStandingsRefreshBackgroundService>();
 
         return services;

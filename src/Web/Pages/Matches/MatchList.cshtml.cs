@@ -1,3 +1,4 @@
+using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Leagues.GetAll;
 using BldLeague.Application.Queries.Matches.GetMatchSummaries;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BldLeague.Web.Pages.Matches;
 
-public class MatchList(IMediator mediator) : PageModel
+public class MatchList(IMediator mediator, RoundClock roundClock) : PageModel
 {
     public IReadOnlyCollection<SeasonSummaryDto> Seasons { get; set; } = new List<SeasonSummaryDto>();
     public IReadOnlyCollection<LeagueSummaryDto> Leagues { get; set; } = new List<LeagueSummaryDto>();
@@ -44,7 +45,7 @@ public class MatchList(IMediator mediator) : PageModel
             RoundNumber = Rounds.GetDefaultRound(DateTime.Today).RoundNumber;
 
         var dtos = await mediator.Send(new GetMatchSummariesRequest(SeasonId, LeagueId, RoundNumber));
-        MatchSummaries = dtos.Select(MatchSummaryViewModel.FromDto).ToList();
+        MatchSummaries = dtos.Select(d => MatchSummaryViewModel.FromDto(d, roundClock)).ToList();
 
         ModelState.Clear();
         return Page();

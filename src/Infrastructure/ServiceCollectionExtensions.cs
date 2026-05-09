@@ -6,6 +6,7 @@ using BldLeague.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace BldLeague.Infrastructure;
@@ -25,13 +26,21 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<RoundClock>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<RoundFinalizationOptions>>().Value;
+            var logger = sp.GetRequiredService<ILogger<RoundClock>>();
             TimeZoneInfo tz;
             try
             {
                 tz = TimeZoneInfo.FindSystemTimeZoneById(options.TimeZoneId);
+                logger.LogInformation("RoundClock: using time zone '{TimeZoneId}' (UTC offset {Offset}).",
+                    options.TimeZoneId, tz.GetUtcOffset(DateTime.UtcNow));
             }
             catch (TimeZoneNotFoundException)
             {
+                logger.LogWarning(
+                    "RoundClock: time zone '{TimeZoneId}' not found on this host — falling back to UTC. " +
+                    "Round timing and submission timestamps will be wrong. " +
+                    "On Alpine Docker images, install the 'tzdata' package.",
+                    options.TimeZoneId);
                 tz = TimeZoneInfo.Utc;
             }
             return new RoundClock(tz);

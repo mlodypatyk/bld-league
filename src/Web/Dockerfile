@@ -1,5 +1,6 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+RUN apk add --no-cache tzdata
 RUN mkdir -p /home/app/.aspnet/DataProtection-Keys && chown $APP_UID /home/app/.aspnet/DataProtection-Keys
 USER $APP_UID
 WORKDIR /app

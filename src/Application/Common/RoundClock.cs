@@ -19,4 +19,7 @@ public class RoundClock(TimeZoneInfo timeZone)
         var today = LocalToday();
         return today >= startDate.Date && today <= endDate.Date;
     }
+
+    public DateTime ToLocal(DateTime utc)
+        => TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), timeZone);
 }

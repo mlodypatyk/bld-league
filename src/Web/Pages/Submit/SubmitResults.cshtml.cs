@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using BldLeague.Application.Commands.Matches.Submit;
+using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Matches.GetActiveSubmission;
 using BldLeague.Domain.Entities;
 using MediatR;
@@ -10,10 +11,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace BldLeague.Web.Pages.Submit;
 
 [Authorize]
-public class SubmitResults(IMediator mediator) : PageModel
+public class SubmitResults(IMediator mediator, RoundClock roundClock) : PageModel
 {
     public ActiveSubmissionDto? ActiveSubmission { get; set; }
     public bool HasSubmitted { get; set; }
+    public string? SubmittedAtLocal { get; set; }
 
     [BindProperty]
     public List<SubmitSolveDto> Solves { get; set; } = Enumerable
@@ -35,6 +37,9 @@ public class SubmitResults(IMediator mediator) : PageModel
         }
 
         HasSubmitted = ActiveSubmission.HasSubmitted;
+        SubmittedAtLocal = ActiveSubmission.SubmittedAt.HasValue
+            ? roundClock.ToLocal(ActiveSubmission.SubmittedAt.Value).ToString("yyyy-MM-dd HH:mm")
+            : null;
         return Page();
     }
 
@@ -61,7 +66,6 @@ public class SubmitResults(IMediator mediator) : PageModel
             return Page();
         }
 
-        TempData["SuccessMessage"] = result.Message;
         return RedirectToPage();
     }
 }

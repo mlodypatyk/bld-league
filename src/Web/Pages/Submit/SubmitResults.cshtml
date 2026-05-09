@@ -5,10 +5,6 @@
 <div class="container mt-2">
     <h2>Mój aktywny mecz</h2>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-    }
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
@@ -64,9 +60,9 @@
         {
             <div class="alert alert-info">
                 Wyniki zostały wgrane
-                @if (Model.ActiveSubmission.SubmittedAt.HasValue)
+                @if (Model.SubmittedAtLocal != null)
                 {
-                    <span>(@Model.ActiveSubmission.SubmittedAt.Value.ToString("yyyy-MM-dd HH:mm") UTC)</span>
+                    <span>(@Model.SubmittedAtLocal)</span>
                 }
                 . Skontaktuj się z administratorem, jeśli musisz je poprawić.
             </div>

@@ -9,7 +9,10 @@ namespace BldLeague.Application.Common;
 public class RoundClock(TimeZoneInfo timeZone)
 {
     public DateTime LocalToday()
-        => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone).Date;
+    {
+        var localDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone).Date;
+        return DateTime.SpecifyKind(localDate, DateTimeKind.Utc);
+    }
 
     public bool IsRoundFinished(DateTime endDate)
         => LocalToday() > endDate.Date;

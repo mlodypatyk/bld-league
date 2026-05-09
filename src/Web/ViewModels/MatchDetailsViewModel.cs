@@ -28,10 +28,13 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
     /// </summary>
     public required List<string?> Scrambles { get; set; }
 
+    public required bool IsRoundFinished { get; set; }
+
     public static MatchDetailsViewModel FromDto(MatchDetailsDto dto, RoundClock clock)
     {
         return new MatchDetailsViewModel
         {
+            IsRoundFinished = clock.IsRoundFinished(dto.RoundEndDate),
             MatchName = $"{dto.UserAFullName} - {dto.UserBFullName ?? string.Empty}",
             MatchId = dto.Id,
             UserAId = dto.UserAId,

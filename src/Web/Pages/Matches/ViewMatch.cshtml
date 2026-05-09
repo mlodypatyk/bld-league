@@ -32,6 +32,13 @@
         else
         {
 
+        @if (!Model.MatchDetails.IsRoundFinished)
+        {
+            <div class="alert alert-info">
+                Scramble będą dostępne po zakończeniu kolejki.
+            </div>
+        }
+
         <div>
             <table class="table table-hover align-middle">
                 <thead class="table">
@@ -42,36 +49,43 @@
                     {
                         <th scope="col" class="text-center"><a asp-page="/Users/UserProfile" asp-route-id="@Model.MatchDetails.UserBId">@Model.MatchDetails.UserBFullName</a></th>
                     }
-                    <th scope="col" class="d-none d-md-table-cell">Scramble</th>
+                    @if (Model.MatchDetails.IsRoundFinished)
+                    {
+                        <th scope="col" class="d-none d-md-table-cell">Scramble</th>
+                    }
                 </tr>
                 </thead>
                 <tbody>
                 @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
                 {
-                    var scramble = Model.MatchDetails.Scrambles[i];
+                    var scramble = Model.MatchDetails.IsRoundFinished ? Model.MatchDetails.Scrambles[i] : null;
                     <tr class="js-detail-row"
                         data-solve="@(i + 1)"
                         data-usera="@Model.MatchDetails.UserAFullName"
                         data-solve-a="@Model.MatchDetails.SolvesUserA[i]"
                         data-userb="@(Model.MatchDetails.UserBFullName ?? "")"
                         data-solve-b="@(string.IsNullOrEmpty(Model.MatchDetails.UserBFullName) ? "" : Model.MatchDetails.SolvesUserB[i])"
-                        data-scramble="@(scramble ?? "")">
+                        data-scramble="@(scramble ?? "")"
+                        data-round-finished="@(Model.MatchDetails.IsRoundFinished ? "1" : "0")">
                         <td class="text-center">@(i+1).</td>
                         <td class="text-center">@Model.MatchDetails.SolvesUserA[i]</td>
                         @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
                         {
                             <td class="text-center">@Model.MatchDetails.SolvesUserB[i]</td>
                         }
-                        <td class="d-none d-md-table-cell font-monospace">
-                            @if (scramble != null)
-                            {
-                                @scramble
-                            }
-                            else
-                            {
-                                <span class="text-muted fst-italic">nie znaleziono scrambla</span>
-                            }
-                        </td>
+                        @if (Model.MatchDetails.IsRoundFinished)
+                        {
+                            <td class="d-none d-md-table-cell font-monospace">
+                                @if (scramble != null)
+                                {
+                                    @scramble
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">nie znaleziono scrambla</span>
+                                }
+                            </td>
+                        }
                     </tr>
                 }
                 <tr>
@@ -81,7 +95,10 @@
                     {
                         <td class="fw-bold text-center">@Model.MatchDetails.UserBBest</td>
                     }
-                    <td class="d-none d-md-table-cell"></td>
+                    @if (Model.MatchDetails.IsRoundFinished)
+                    {
+                        <td class="d-none d-md-table-cell"></td>
+                    }
                 </tr>
                 <tr>
                     <td class="text-center">Ao5</td>
@@ -90,7 +107,10 @@
                     {
                         <td class="fw-bold text-center">@Model.MatchDetails.UserBAverage</td>
                     }
-                    <td class="d-none d-md-table-cell"></td>
+                    @if (Model.MatchDetails.IsRoundFinished)
+                    {
+                        <td class="d-none d-md-table-cell"></td>
+                    }
                 </tr>
                 <tr>
                     <td class="text-center">Wynik</td>
@@ -103,7 +123,10 @@
                     {
                         <td class="fw-bold text-center">N/A</td>
                     }
-                    <td class="d-none d-md-table-cell"></td>
+                    @if (Model.MatchDetails.IsRoundFinished)
+                    {
+                        <td class="d-none d-md-table-cell"></td>
+                    }
                 </tr>
                 </tbody>
             </table>
@@ -150,9 +173,11 @@
                     addField(dl, 'Ułożenie', d.solve);
                     addField(dl, d.usera, d.solveA);
                     if (d.userb) addField(dl, d.userb, d.solveB);
-                    addField(dl, 'Scramble',
-                        d.scramble || 'nie znaleziono scrambla',
-                        'font-monospace' + (d.scramble ? '' : ' fst-italic text-muted'));
+                    if (d.roundFinished === '1') {
+                        addField(dl, 'Scramble',
+                            d.scramble || 'nie znaleziono scrambla',
+                            'font-monospace' + (d.scramble ? '' : ' fst-italic text-muted'));
+                    }
                     modalBody.innerHTML = '';
                     modalBody.appendChild(dl);
                     modal.show();

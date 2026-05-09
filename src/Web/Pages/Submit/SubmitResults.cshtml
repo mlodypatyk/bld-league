@@ -52,7 +52,8 @@
                     </div>
                 }
 
-                <button type="submit" class="btn btn-primary">Wgraj wyniki</button>
+                <button type="submit" class="btn btn-primary"
+                        onclick="return confirm('Czy na pewno chcesz wgrać wyniki? Tej operacji nie można cofnąć.');">Wgraj wyniki</button>
                 <a asp-page="/Index" class="btn btn-outline-secondary ms-2">Anuluj</a>
             </form>
         }

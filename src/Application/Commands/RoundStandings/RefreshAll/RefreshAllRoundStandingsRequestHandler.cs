@@ -8,13 +8,13 @@ namespace BldLeague.Application.Commands.RoundStandings.RefreshAll;
 /// <summary>
 /// Handles recalculating standings for every round in the database.
 /// </summary>
-public class RefreshAllRoundStandingsRequestHandler(IUnitOfWork unitOfWork, ISender sender)
+public class RefreshAllRoundStandingsRequestHandler(IUnitOfWork unitOfWork, ISender sender, RoundClock roundClock)
     : IRequestHandler<RefreshAllRoundStandingsRequest, CommandResult>
 {
     public async Task<CommandResult> Handle(RefreshAllRoundStandingsRequest request, CancellationToken cancellationToken)
     {
         var allRounds = await unitOfWork.RoundRepository.GetAllRoundSummariesAsync();
-        var finishedRounds = allRounds.Where(r => r.EndDate < DateTime.UtcNow).ToList();
+        var finishedRounds = allRounds.Where(r => roundClock.IsRoundFinished(r.EndDate)).ToList();
 
         foreach (var round in finishedRounds)
         {

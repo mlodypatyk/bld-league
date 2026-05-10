@@ -1,7 +1,9 @@
+using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Leagues.GetAll;
 using BldLeague.Application.Queries.Matches.GetMatchSummaries;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Seasons.GetAll;
+using BldLeague.Web.Helpers;
 using BldLeague.Web.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +11,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BldLeague.Web.Pages.Matches;
 
-public class MatchList(IMediator mediator) : PageModel
+public class MatchList(IMediator mediator, RoundClock roundClock) : PageModel
 {
     public IReadOnlyCollection<SeasonSummaryDto> Seasons { get; set; } = new List<SeasonSummaryDto>();
     public IReadOnlyCollection<LeagueSummaryDto> Leagues { get; set; } = new List<LeagueSummaryDto>();
@@ -36,15 +38,19 @@ public class MatchList(IMediator mediator) : PageModel
             SeasonId = Seasons.First().Id;
 
         if (LeagueId == Guid.Empty || !Leagues.Any(l => l.Id == LeagueId))
-            LeagueId = Leagues.First().Id;
+        {
+            var availableLeagueIds = Leagues.Select(l => l.Id).ToList();
+            LeagueId = await this.ResolveCurrentUserLeagueIdAsync(mediator, availableLeagueIds, SeasonId)
+                       ?? Leagues.First().Id;
+        }
 
         Rounds = await mediator.Send(new GetAllRoundsBySeasonIdRequest(SeasonId));
 
         if (Rounds.Any() && (RoundNumber == 0 || !Rounds.Any(r => r.RoundNumber == RoundNumber)))
-            RoundNumber = Rounds.GetDefaultRound(DateTime.Today).RoundNumber;
+            RoundNumber = Rounds.GetDefaultRound(roundClock).RoundNumber;
 
         var dtos = await mediator.Send(new GetMatchSummariesRequest(SeasonId, LeagueId, RoundNumber));
-        MatchSummaries = dtos.Select(MatchSummaryViewModel.FromDto).ToList();
+        MatchSummaries = dtos.Select(d => MatchSummaryViewModel.FromDto(d, roundClock)).ToList();
 
         ModelState.Clear();
         return Page();

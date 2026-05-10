@@ -11,7 +11,7 @@ namespace BldLeague.Application.Commands.RoundStandings.Refresh;
 /// <summary>
 /// Handles recalculating round standings from match results, assigning places and bonus points, then triggering league season standings refresh.
 /// </summary>
-public class RefreshRoundStandingsRequestHandler(IUnitOfWork unitOfWork, ISender sender)
+public class RefreshRoundStandingsRequestHandler(IUnitOfWork unitOfWork, ISender sender, RoundClock roundClock)
     : IRequestHandler<RefreshRoundStandingsRequest, CommandResult>
 {
     public async Task<CommandResult> Handle(RefreshRoundStandingsRequest request, CancellationToken cancellationToken)
@@ -23,7 +23,7 @@ public class RefreshRoundStandingsRequestHandler(IUnitOfWork unitOfWork, ISender
                 $"Nie znaleziono rundy z ID: {request.RoundId}");
         }
 
-        if (round.EndDate >= DateTime.UtcNow)
+        if (!roundClock.IsRoundFinished(round.EndDate))
         {
             return CommandResult.FailGeneral(
                 $"Nie można odświeżyć klasyfikacji niezakończonej kolejki (kolejka {round.RoundNumber}).");

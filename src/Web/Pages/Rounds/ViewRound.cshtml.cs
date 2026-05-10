@@ -1,3 +1,4 @@
+using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Rounds.GetDetail;
 using BldLeague.Application.Queries.Seasons.GetAll;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BldLeague.Web.Pages.Rounds;
 
-public class ViewRound(IMediator mediator) : PageModel
+public class ViewRound(IMediator mediator, RoundClock roundClock) : PageModel
 {
     public IReadOnlyCollection<SeasonSummaryDto> Seasons { get; set; } = new List<SeasonSummaryDto>();
     public IReadOnlyCollection<RoundSummaryDto> Rounds { get; set; } = new List<RoundSummaryDto>();
@@ -36,10 +37,10 @@ public class ViewRound(IMediator mediator) : PageModel
             return Page();
 
         if (RoundNumber == 0 || !Rounds.Any(r => r.RoundNumber == RoundNumber))
-            RoundNumber = Rounds.GetDefaultRound(DateTime.Today).RoundNumber;
+            RoundNumber = Rounds.GetDefaultRound(roundClock).RoundNumber;
 
         var dto = await mediator.Send(new GetRoundDetailRequest(SeasonId, RoundNumber));
-        RoundDetail = dto == null ? null : RoundDetailViewModel.FromDto(dto);
+        RoundDetail = dto == null ? null : RoundDetailViewModel.FromDto(dto, roundClock);
 
         ModelState.Clear();
         return Page();

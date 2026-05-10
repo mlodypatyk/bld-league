@@ -1,0 +1,53 @@
+@page "/Submit/SubmitResults"
+@using BldLeague.Domain.Entities
+@model BldLeague.Web.Pages.Submit.SubmitResults
+
+<div class="container mt-2">
+    <h2>Aktywny mecz</h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (Model.ActiveSubmission != null)
+    {
+        <p class="text-muted">
+            @if (!string.IsNullOrEmpty(Model.ActiveSubmission.OpponentName))
+            {
+                <span>Rywal: @Model.ActiveSubmission.OpponentName</span>
+            }
+            else
+            {
+                <span>BYE</span>
+            }
+        </p>
+
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
+            {
+                var scramble = i < Model.ActiveSubmission.Scrambles.Count
+                    ? Model.ActiveSubmission.Scrambles[i]
+                    : null;
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Ułożenie @(i + 1)</label>
+                    @if (scramble != null)
+                    {
+                        <div class="font-monospace text-muted mb-1 small">@scramble.Notation</div>
+                    }
+                    <input asp-for="Solves[i].Result"
+                           class="form-control"
+                           placeholder="np. 12.34 lub DNF" />
+                    <span asp-validation-for="Solves[i].Result" class="text-danger"></span>
+                </div>
+            }
+
+            <button type="submit" class="btn btn-primary"
+                    onclick="return confirm('Czy na pewno chcesz wgrać wyniki? Tej operacji nie można cofnąć.');">Wgraj wyniki</button>
+            <a asp-page="/Index" class="btn btn-outline-secondary ms-2">Anuluj</a>
+        </form>
+    }
+</div>

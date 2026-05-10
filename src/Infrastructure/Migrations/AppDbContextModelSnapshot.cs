@@ -228,6 +228,10 @@ namespace BldLeague.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("user_a_score");
 
+                    b.Property<DateTime?>("UserASubmittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("user_a_submitted_at");
+
                     b.Property<int>("UserBAverage")
                         .HasColumnType("integer")
                         .HasColumnName("user_b_average");
@@ -243,6 +247,10 @@ namespace BldLeague.Infrastructure.Migrations
                     b.Property<int>("UserBScore")
                         .HasColumnType("integer")
                         .HasColumnName("user_b_score");
+
+                    b.Property<DateTime?>("UserBSubmittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("user_b_submitted_at");
 
                     b.HasKey("Id")
                         .HasName("pk_matches");
@@ -353,11 +361,6 @@ namespace BldLeague.Infrastructure.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_date");
-
-                    b.Property<string>("SubmissionFormUrl")
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)")
-                        .HasColumnName("submission_form_url");
 
                     b.HasKey("Id")
                         .HasName("pk_rounds");

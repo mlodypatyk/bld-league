@@ -9,10 +9,10 @@ namespace BldLeague.Infrastructure.Repositories;
 public class SolveRepository(AppDbContext context) : 
     ReadWriteRepositoryBase<Solve>(context), ISolveRepository
 {
-    public async Task<IReadOnlyCollection<(Guid, SolveResult)>> GetBestSolvesForLeagueSeason(Guid leagueSeasonId)
+    public async Task<IReadOnlyCollection<(Guid, SolveResult)>> GetBestSolvesForLeagueSeason(Guid leagueSeasonId, DateTime cutoff)
     {
         var groups = await DbSet
-            .Where(s => s.Match.LeagueSeasonId == leagueSeasonId)
+            .Where(s => s.Match.LeagueSeasonId == leagueSeasonId && s.Match.Round.EndDate < cutoff)
             .GroupBy(s => s.UserId)
             .Select(g => new
             {
@@ -33,15 +33,17 @@ public class SolveRepository(AppDbContext context) :
             .ToList();
     }
 
-    public async Task<IReadOnlyCollection<SolveResult>> GetFinishedSolvesByUserIdAsync(Guid userId)
-    {
-        var today = DateTime.UtcNow.Date;
-        return await DbSet
-            .Where(s => s.UserId == userId && s.Match.Round.EndDate < today)
+    public async Task<IReadOnlyCollection<SolveResult>> GetFinishedSolvesByUserIdAsync(Guid userId, DateTime localToday)
+        => await DbSet
+            .Where(s => s.UserId == userId && s.Match.Round.EndDate < localToday)
             .OrderBy(s => s.Match.Round.Season.SeasonNumber)
             .ThenBy(s => s.Match.Round.RoundNumber)
             .ThenBy(s => s.Index)
             .Select(s => s.Result)
             .ToListAsync();
-    }
+
+    public async Task<IReadOnlyCollection<Solve>> GetByMatchIdAsync(Guid matchId)
+        => await DbSet
+            .Where(s => s.MatchId == matchId)
+            .ToListAsync();
 }

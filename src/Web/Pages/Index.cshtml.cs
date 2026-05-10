@@ -1,5 +1,7 @@
 using System.Security.Claims;
-using BldLeague.Application.Queries.Rounds.GetActiveFormUrl;
+using BldLeague.Application.Queries.Matches.GetActiveSubmission;
+using BldLeague.Application.Queries.Matches.GetRecentFinishedMatches;
+using BldLeague.Application.Queries.Rounds.GetActiveRound;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -9,22 +11,29 @@ public class IndexModel(IMediator mediator) : PageModel
 {
     public bool IsAuthenticated { get; set; }
     public string? UserName { get; set; }
-    public string? WcaId { get; set; }
     public string? Role { get; set; }
     public string? ThumbnailUrl { get; set; }
-    public ActiveRoundFormDto? ActiveRoundForm { get; set; }
+    public ActiveSubmissionDto? ActiveSubmission { get; set; }
+    public IReadOnlyList<RecentMatchDto> RecentMatches { get; set; } = [];
+    public ActiveRoundDto? ActiveRound { get; set; }
 
     public async Task OnGet()
     {
-        IsAuthenticated = User.Identity != null;
-        if (User.Identity != null)
+        IsAuthenticated = User.Identity?.IsAuthenticated == true;
+        if (IsAuthenticated)
         {
             UserName = User.FindFirst(ClaimTypes.Name)?.Value;
-            WcaId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             Role = User.FindFirst(ClaimTypes.Role)?.Value;
             ThumbnailUrl = User.FindFirst("thumbnail")?.Value;
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim != null && Guid.TryParse(userIdClaim, out var userId))
+            {
+                ActiveSubmission = await mediator.Send(new GetActiveSubmissionRequest(userId));
+            }
         }
 
-        ActiveRoundForm = await mediator.Send(new GetActiveRoundFormUrlRequest());
+        RecentMatches = await mediator.Send(new GetRecentFinishedMatchesRequest(3));
+        ActiveRound = await mediator.Send(new GetActiveRoundRequest());
     }
 }

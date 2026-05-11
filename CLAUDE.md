@@ -281,6 +281,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Season 2 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason2.cshtml[.cs]` |
 | Season 1 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason1.cshtml[.cs]` |
 | Guidelines season selector dropdown (partial) | `src/Web/Pages/About/Shared/_GuidelinesSeasonSelector.cshtml` |
+| Guidelines shared Punktacja criteria block (partial, used by all season pages) | `src/Web/Pages/About/Shared/_PunktacjaCriteria.cshtml` |
 
 ### Web — admin pages
 

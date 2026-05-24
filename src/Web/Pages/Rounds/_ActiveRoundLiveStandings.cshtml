@@ -1,0 +1,114 @@
+@model BldLeague.Web.ViewModels.ActiveRoundLiveDetailViewModel
+
+<table class="table table-hover align-middle">
+    <thead class="table">
+        <tr>
+            <th scope="col">Zawodnik</th>
+            <th scope="col" class="d-none d-md-table-cell">Liga</th>
+            <th scope="col">Best</th>
+            <th scope="col">Ao5</th>
+            <th scope="col" class="d-none d-md-table-cell">A1</th>
+            <th scope="col" class="d-none d-md-table-cell">A2</th>
+            <th scope="col" class="d-none d-md-table-cell">A3</th>
+            <th scope="col" class="d-none d-md-table-cell">A4</th>
+            <th scope="col" class="d-none d-md-table-cell">A5</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr class="table-light">
+            <td colspan="9" class="fw-bold text-uppercase text-muted small">Wyniki</td>
+        </tr>
+        @if (Model.FinishedRows.Any())
+        {
+            foreach (var row in Model.FinishedRows)
+            {
+                <tr>
+                    <td><a asp-page="/Users/UserProfile" asp-route-id="@row.UserId">@row.UserFullName</a></td>
+                    <td class="d-none d-md-table-cell">@row.LeagueIdentifier</td>
+                    <td class="fw-bold">@row.Best</td>
+                    <td>@row.Average</td>
+                    <td class="d-none d-md-table-cell">@row.Solve1</td>
+                    <td class="d-none d-md-table-cell">@row.Solve2</td>
+                    <td class="d-none d-md-table-cell">@row.Solve3</td>
+                    <td class="d-none d-md-table-cell">@row.Solve4</td>
+                    <td class="d-none d-md-table-cell">@row.Solve5</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">Brak ukończonych meczów.</td>
+            </tr>
+        }
+    </tbody>
+
+    <tbody>
+        <tr class="table-light">
+            <td colspan="9" class="fw-bold text-uppercase text-muted small">Wgrane, oczekuje na przeciwnika</td>
+        </tr>
+        @if (Model.SubmittedAloneRows.Any())
+        {
+            foreach (var row in Model.SubmittedAloneRows)
+            {
+                <tr class="table-warning">
+                    <td>
+                        <a asp-page="/Users/UserProfile" asp-route-id="@row.UserId">@row.UserFullName</a>
+                        <span class="badge text-bg-success ms-2">
+                            <i class="bi bi-check-circle"></i> Wgrane, oczekuje na przeciwnika
+                        </span>
+                    </td>
+                    <td class="d-none d-md-table-cell">@row.LeagueIdentifier</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">Brak.</td>
+            </tr>
+        }
+    </tbody>
+
+    <tbody>
+        <tr class="table-light">
+            <td colspan="9" class="fw-bold text-uppercase text-muted small">Brak wyniku</td>
+        </tr>
+        @if (Model.PendingRows.Any())
+        {
+            foreach (var row in Model.PendingRows)
+            {
+                <tr class="table-secondary">
+                    <td>
+                        <a asp-page="/Users/UserProfile" asp-route-id="@row.UserId">@row.UserFullName</a>
+                        <span class="badge text-bg-secondary ms-2">
+                            <i class="bi bi-hourglass-split"></i> Brak wyniku
+                        </span>
+                    </td>
+                    <td class="d-none d-md-table-cell">@row.LeagueIdentifier</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                    <td class="d-none d-md-table-cell">—</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">Brak.</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -5,7 +5,6 @@ description: Execution agent. Fetches a GitHub issue, implements the solution in
 You are launching the **Executioner** for issue #$ARGUMENTS.
 
 Spawn a sub-agent using the Agent tool with these settings:
-- `model: "sonnet"`
 - `isolation: "worktree"` (creates an isolated copy of the repo — safe to run in parallel)
 
 Pass the following prompt to the sub-agent (the issue number is already substituted):
@@ -23,9 +22,18 @@ Determine branch name from the issue's type label:
 - `type: bug` → `fix/$ARGUMENTS-short-description`
 - `type: chore` → `chore/$ARGUMENTS-short-description`
 
-Create the branch from `main`:
+Pick the base branch:
+- Default to `main`.
+- If the user has indicated otherwise (e.g. a hotfix off `staging`, or stacked work on top of an existing feature branch), use that branch instead.
+- If the issue body specifies a base branch, follow it.
+
+**Always fetch and pull the base branch before creating your working branch** — a stale local base will silently put you behind `origin` and the resulting branch will miss recent commits. Do not skip this step even if you "just" checked out the base.
+
 ```
-git checkout main && git pull origin main && git checkout -b [branch-name]
+git fetch origin
+git checkout [base-branch]
+git pull origin [base-branch]
+git checkout -b [branch-name]
 ```
 
 ### Step 3 — Research before writing
@@ -76,4 +84,12 @@ End your response with this report:
 
 ---
 
-After the sub-agent completes, relay the full report to the user. If there are blockers, ask how to proceed before moving on.
+After the sub-agent completes:
+
+1. Relay the full report to the user.
+2. Clean up the worktree so the branch can be checked out locally for review:
+   ```
+   git worktree remove [worktree-path]
+   ```
+   Run this from the main repo (not from inside the worktree). The branch and commits stay intact — only the working directory is removed. If the worktree has uncommitted changes the command will refuse; investigate before falling back to `--force`.
+3. If there are blockers, ask the user how to proceed.

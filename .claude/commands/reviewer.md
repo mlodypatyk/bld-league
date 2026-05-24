@@ -122,4 +122,11 @@ If there are no blockers, ask the user:
    - **Body:** include `Closes #[issue-number]` — no test plan or verification checklist (per CLAUDE.md)
    - **Labels:** same type label as the issue
 
-4. Return the PR URL to the user.
+4. Clean up any leftover worktree for `[BRANCH]` so it can be checked out locally:
+   ```
+   git worktree list
+   git worktree remove [path]   # if a worktree for [BRANCH] still exists
+   ```
+   The branch stays — only the working directory goes. If the worktree has uncommitted changes the command will refuse; investigate before resorting to `--force`.
+
+5. Return the PR URL to the user.

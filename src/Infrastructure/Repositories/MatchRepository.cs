@@ -185,7 +185,7 @@ public class MatchRepository(AppDbContext context)
                         && m.Round.EndDate >= localToday)
             .FirstOrDefaultAsync();
 
-    public async Task<IReadOnlyList<RecentMatchProjection>> GetRecentFinishedMatchesAsync(int count, DateTime localToday)
+    public async Task<IReadOnlyList<RecentMatchDto>> GetRecentFinishedMatchesAsync(int count, DateTime localToday)
     {
         var candidates = await DbSet
             .Where(m => (m.UserASubmittedAt != null && (m.UserBId == null || m.UserBSubmittedAt != null))
@@ -205,7 +205,7 @@ public class MatchRepository(AppDbContext context)
                 LeagueIdentifier = m.LeagueSeason.League.LeagueIdentifier,
                 SeasonNumber = m.LeagueSeason.Season.SeasonNumber,
                 RoundNumber = m.Round.RoundNumber,
-                RoundStartDate = m.Round.StartDate,
+                IsFromActiveRound = m.Round.StartDate <= localToday && m.Round.EndDate >= localToday,
                 RoundEndDate = m.Round.EndDate,
             })
             .ToListAsync();
@@ -217,7 +217,7 @@ public class MatchRepository(AppDbContext context)
                     ? (m.UserASubmittedAt > m.UserBSubmittedAt ? m.UserASubmittedAt : m.UserBSubmittedAt)
                     : m.UserASubmittedAt ?? m.UserBSubmittedAt ?? (DateTime?)m.RoundEndDate;
 
-                return (projection: new RecentMatchProjection
+                return (dto: new RecentMatchDto
                 {
                     MatchId = m.Id,
                     UserAFullName = m.UserAFullName,
@@ -227,14 +227,13 @@ public class MatchRepository(AppDbContext context)
                     LeagueIdentifier = m.LeagueIdentifier,
                     SeasonNumber = m.SeasonNumber,
                     RoundNumber = m.RoundNumber,
-                    RoundStartDate = m.RoundStartDate,
-                    RoundEndDate = m.RoundEndDate,
+                    IsFromActiveRound = m.IsFromActiveRound,
                 }, effectiveAt);
             })
             .OrderByDescending(x => x.effectiveAt)
-            .ThenByDescending(x => x.projection.MatchId)
+            .ThenByDescending(x => x.dto.MatchId)
             .Take(count)
-            .Select(x => x.projection)
+            .Select(x => x.dto)
             .ToList();
     }
 }

@@ -116,6 +116,14 @@ Concretely:
 - Pages inspect `result.Success` / `result.IsGeneralError` and route accordingly (add to `ModelState` or set `TempData`).
 - Never `throw` to indicate that a user-facing operation could not be completed.
 
+### English Identifiers Only
+All code identifiers — variables, methods, classes, parameters, properties, fields, namespaces, file names — must be in English. The UI is Polish (the league is Polish-speaking), but the codebase is English-only. Polish words appear **only** in Razor view text content, user-facing string literals, `[Display]` attributes, and CSS/icon labels — never as a symbol name in C# or Razor `@{}` blocks.
+
+Concretely:
+- `roundBadgeClass`, not `kolejkaBadgeClass`.
+- `seasonNumber`, not `numerSezonu`.
+- A Razor block may render the word "Kolejka" as on-screen text, but the C# variable holding that string is named in English.
+
 ## UI Principles
 
 ### Plain, Simple Razor Pages
@@ -221,7 +229,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Round queries + DTOs (incl. `ScrambleDto`, `RoundSummaryDto`) | `src/Application/Queries/Rounds/` |
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
 | Active submission query + `ActiveSubmissionDto` | `src/Application/Queries/Matches/GetActiveSubmission/` |
-| Recent finished matches query + `RecentMatchDto` (+ internal `RecentMatchProjection`) | `src/Application/Queries/Matches/GetRecentFinishedMatches/` |
+| Recent finished matches query + `RecentMatchDto` | `src/Application/Queries/Matches/GetRecentFinishedMatches/` |
 | Active round query + `ActiveRoundDto` | `src/Application/Queries/Rounds/GetActiveRound/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
 | Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |

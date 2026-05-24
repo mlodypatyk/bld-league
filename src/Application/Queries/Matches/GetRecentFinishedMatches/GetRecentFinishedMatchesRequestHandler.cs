@@ -8,23 +8,5 @@ public class GetRecentFinishedMatchesRequestHandler(IUnitOfWork unitOfWork, Roun
     : IRequestHandler<GetRecentFinishedMatchesRequest, IReadOnlyList<RecentMatchDto>>
 {
     public async Task<IReadOnlyList<RecentMatchDto>> Handle(GetRecentFinishedMatchesRequest request, CancellationToken cancellationToken)
-    {
-        var localToday = roundClock.LocalToday();
-        var projections = await unitOfWork.MatchRepository.GetRecentFinishedMatchesAsync(request.Count, localToday);
-
-        return projections
-            .Select(p => new RecentMatchDto
-            {
-                MatchId = p.MatchId,
-                UserAFullName = p.UserAFullName,
-                UserBFullName = p.UserBFullName,
-                UserAScore = p.UserAScore,
-                UserBScore = p.UserBScore,
-                LeagueIdentifier = p.LeagueIdentifier,
-                SeasonNumber = p.SeasonNumber,
-                RoundNumber = p.RoundNumber,
-                IsFromActiveRound = roundClock.IsRoundActive(p.RoundStartDate, p.RoundEndDate),
-            })
-            .ToList();
-    }
+        => await unitOfWork.MatchRepository.GetRecentFinishedMatchesAsync(request.Count, roundClock.LocalToday());
 }

@@ -8,7 +8,7 @@
 
     string ChipClass(bool win) => tie ? "bg-warning text-dark" : (win ? "bg-success text-white" : "bg-secondary text-white");
 
-    var kolejkaBadgeClass = Model.IsFromActiveRound ? "bg-primary text-white" : "bg-light text-dark";
+    var roundBadgeClass = Model.IsFromActiveRound ? "bg-primary text-white" : "bg-light text-dark";
 }
 
 <a asp-page="/Matches/ViewMatch" asp-route-id="@Model.MatchId" class="text-decoration-none">
@@ -39,7 +39,7 @@
                 }
                 <div class="mt-2 d-flex gap-1">
                     <span class="badge bg-light text-dark">Sezon @Model.SeasonNumber</span>
-                    <span class="badge @kolejkaBadgeClass">Kolejka @Model.RoundNumber</span>
+                    <span class="badge @roundBadgeClass">Kolejka @Model.RoundNumber</span>
                 </div>
             </div>
         </div>

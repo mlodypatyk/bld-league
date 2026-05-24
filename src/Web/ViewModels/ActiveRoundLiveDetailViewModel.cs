@@ -10,7 +10,6 @@ public class ActiveRoundLiveDetailViewModel
 {
     public required string StartDate { get; set; }
     public required string EndDate { get; set; }
-    public bool IsFinished => false;
     public required List<ActiveRoundLiveRowViewModel> FinishedRows { get; set; }
     public required List<ActiveRoundLiveRowViewModel> SubmittedAloneRows { get; set; }
     public required List<ActiveRoundLiveRowViewModel> PendingRows { get; set; }

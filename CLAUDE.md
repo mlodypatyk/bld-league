@@ -273,6 +273,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | View round results (finished vs. active branches) | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
 | Finished-round standings table (partial) | `src/Web/Pages/Rounds/_FinishedRoundStandings.cshtml` |
 | Active-round three-section live table (partial) | `src/Web/Pages/Rounds/_ActiveRoundLiveStandings.cshtml` |
+| Shared identity row for the two no-reveal sections of the live table (partial) | `src/Web/Pages/Rounds/_LiveRoundIdentityRow.cshtml` |
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |

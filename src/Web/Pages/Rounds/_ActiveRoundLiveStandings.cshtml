@@ -52,22 +52,15 @@
         {
             foreach (var row in Model.SubmittedAloneRows)
             {
-                <tr class="table-warning">
-                    <td>
-                        <a asp-page="/Users/UserProfile" asp-route-id="@row.UserId">@row.UserFullName</a>
-                        <span class="badge text-bg-success ms-2">
-                            <i class="bi bi-check-circle"></i> Wgrane, oczekuje na przeciwnika
-                        </span>
-                    </td>
-                    <td class="d-none d-md-table-cell">@row.LeagueIdentifier</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                </tr>
+                var submittedAloneModel = new BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
+                {
+                    Row = row,
+                    RowCssClass = "table-warning",
+                    BadgeCssClass = "text-bg-success",
+                    IconCssClass = "bi-check-circle",
+                    BadgeText = "Wgrane, oczekuje na przeciwnika",
+                };
+                <partial name="_LiveRoundIdentityRow" model="submittedAloneModel" />
             }
         }
         else
@@ -86,22 +79,15 @@
         {
             foreach (var row in Model.PendingRows)
             {
-                <tr class="table-secondary">
-                    <td>
-                        <a asp-page="/Users/UserProfile" asp-route-id="@row.UserId">@row.UserFullName</a>
-                        <span class="badge text-bg-secondary ms-2">
-                            <i class="bi bi-hourglass-split"></i> Brak wyniku
-                        </span>
-                    </td>
-                    <td class="d-none d-md-table-cell">@row.LeagueIdentifier</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                    <td class="d-none d-md-table-cell">—</td>
-                </tr>
+                var pendingModel = new BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
+                {
+                    Row = row,
+                    RowCssClass = "table-secondary",
+                    BadgeCssClass = "text-bg-secondary",
+                    IconCssClass = "bi-hourglass-split",
+                    BadgeText = "Brak wyniku",
+                };
+                <partial name="_LiveRoundIdentityRow" model="pendingModel" />
             }
         }
         else

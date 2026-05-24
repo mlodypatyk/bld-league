@@ -1,0 +1,299 @@
+@page "/Statistics"
+@using System.Globalization
+@using System.Text.Json
+@using BldLeague.Web.Pages.Statistics
+@model BldLeague.Web.Pages.Statistics.Statistics
+
+@{
+    ViewData["Title"] = "Statystyki";
+    var dayNames = Statistics.PolishDayNames();
+}
+
+<div class="container mt-2">
+    <h2>Statystyki</h2>
+
+    @if (Model.Data == null)
+    {
+        <p>Brak danych.</p>
+    }
+    else
+    {
+        <!-- 2.1 Header tiles -->
+        <div class="row g-3 mt-1">
+            @foreach (var tile in Model.Data.Summary.Tiles)
+            {
+                <partial name="_StatTile" model="tile" />
+            }
+        </div>
+
+        <!-- 2.2 Submission hour-of-day histogram -->
+        <h5 class="mt-4 mb-3">Godziny wgrywania wyników</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <canvas id="hour-histogram"
+                    data-labels='@Html.Raw(JsonSerializer.Serialize(Enumerable.Range(0, 24).Select(h => h.ToString("00")).ToArray()))'
+                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.HourHistogram.Counts))'></canvas>
+            <div class="text-muted small mt-2">
+                na podstawie @Model.Data.HourHistogram.IncludedMatches z @Model.Data.HourHistogram.TotalMatches meczów
+            </div>
+        </div>
+
+        <!-- 2.3 Day-of-week × hour-of-day heatmap -->
+        <h5 class="mt-4 mb-3">Rozkład wgrywania (dzień × godzina)</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm mb-0" style="font-size: 0.75rem; text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            @for (int h = 0; h < 24; h++)
+                            {
+                                <th>@h.ToString("00")</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int d = 0; d < 7; d++)
+                        {
+                            <tr>
+                                <th>@dayNames[d]</th>
+                                @for (int h = 0; h < 24; h++)
+                                {
+                                    var count = Model.Data.Heatmap.Matrix[d, h];
+                                    double alpha = Model.Data.Heatmap.MaxCount > 0
+                                        ? (double)count / Model.Data.Heatmap.MaxCount
+                                        : 0.0;
+                                    var alphaStr = alpha.ToString("0.00", CultureInfo.InvariantCulture);
+                                    var bg = count > 0
+                                        ? $"background-color: rgba(13,110,253,{alphaStr});"
+                                        : string.Empty;
+                                    <td style="@bg" title="@dayNames[d] @h.ToString("00"):00 — @count">@(count > 0 ? count.ToString() : "")</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-muted small mt-2">
+                na podstawie @Model.Data.Heatmap.IncludedMatches z @Model.Data.Heatmap.TotalMatches meczów
+            </div>
+        </div>
+
+        <!-- 2.4 Solve duration histogram -->
+        <h5 class="mt-4 mb-3">Rozkład czasów ułożeń</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <canvas id="duration-histogram"
+                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.SolveDurations.Buckets.Select(b => b.Label).ToArray()))'
+                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.SolveDurations.Buckets.Select(b => b.Count).ToArray()))'></canvas>
+        </div>
+
+        <!-- 2.5 Submission-vs-deadline histogram -->
+        <h5 class="mt-4 mb-3">Czas do końca rundy przy wgraniu wyników</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <canvas id="deadline-histogram"
+                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.DeadlineDistances.Buckets.Select(b => b.Label).ToArray()))'
+                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.DeadlineDistances.Buckets.Select(b => b.Count).ToArray()))'></canvas>
+        </div>
+
+        <!-- 2.6 Match score distribution -->
+        <h5 class="mt-4 mb-3">Rozkład wyników meczów</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <canvas id="score-distribution"
+                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.ScoreDistribution.Buckets.Select(b => b.Label).ToArray()))'
+                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.ScoreDistribution.Buckets.Select(b => b.Count).ToArray()))'></canvas>
+        </div>
+
+        <!-- 2.7 Per-season records table -->
+        <h5 class="mt-4 mb-3">Rekordy sezonowe</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Sezon</th>
+                        <th class="text-nowrap">Najlepszy single</th>
+                        <th>Zawodnik</th>
+                        <th class="text-nowrap">Najlepsza Ao5</th>
+                        <th>Zawodnik</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model.Data.SeasonRecords.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center">Brak danych.</td></tr>
+                }
+                else
+                {
+                    @foreach (var row in Model.Data.SeasonRecords)
+                    {
+                        <tr>
+                            <td>@row.SeasonName</td>
+                            <td class="fw-bold text-nowrap">@(row.BestSingle?.ToString() ?? "-")</td>
+                            <td>
+                                @if (row.BestSingleUserId.HasValue)
+                                {
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@row.BestSingleUserId">@row.BestSingleUserFullName</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td class="fw-bold text-nowrap">@(row.BestAverage?.ToString() ?? "-")</td>
+                            <td>
+                                @if (row.BestAverageUserId.HasValue)
+                                {
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@row.BestAverageUserId">@row.BestAverageUserFullName</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2.8 Per-league records and averages table -->
+        <h5 class="mt-4 mb-3">Rekordy i średnie lig</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Liga</th>
+                        <th class="text-nowrap">Średni czas</th>
+                        <th class="text-nowrap">Najlepszy single</th>
+                        <th>Zawodnik</th>
+                        <th class="text-nowrap">Najlepsza Ao5</th>
+                        <th>Zawodnik</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model.Data.LeagueRecords.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center">Brak danych.</td></tr>
+                }
+                else
+                {
+                    @foreach (var row in Model.Data.LeagueRecords)
+                    {
+                        <tr>
+                            <td>@row.LeagueName</td>
+                            <td class="text-nowrap">@(row.AverageSolve?.ToString() ?? "-")</td>
+                            <td class="fw-bold text-nowrap">@(row.BestSingle?.ToString() ?? "-")</td>
+                            <td>
+                                @if (row.BestSingleUserId.HasValue)
+                                {
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@row.BestSingleUserId">@row.BestSingleUserFullName</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td class="fw-bold text-nowrap">@(row.BestAverage?.ToString() ?? "-")</td>
+                            <td>
+                                @if (row.BestAverageUserId.HasValue)
+                                {
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@row.BestAverageUserId">@row.BestAverageUserFullName</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2.9 Streak leaders -->
+        <h5 class="mt-4 mb-3">Najdłuższe serie</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-fire fs-2 text-danger"></i>
+                        <div>
+                            <div class="fw-semibold">Najdłuższa seria ułożeń</div>
+                            @if (Model.Data.StreakLeaders.Solve != null)
+                            {
+                                <div class="text-muted small">
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@Model.Data.StreakLeaders.Solve.UserId">@Model.Data.StreakLeaders.Solve.FullName</a>
+                                    — @Model.Data.StreakLeaders.Solve.Length ułożeń
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted small">Brak danych.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-trophy-fill fs-2 text-warning"></i>
+                        <div>
+                            <div class="fw-semibold">Najdłuższa seria zwycięstw</div>
+                            @if (Model.Data.StreakLeaders.Win != null)
+                            {
+                                <div class="text-muted small">
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@Model.Data.StreakLeaders.Win.UserId">@Model.Data.StreakLeaders.Win.FullName</a>
+                                    — @Model.Data.StreakLeaders.Win.Length zwycięstw
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted small">Brak danych.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section HeadScripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            function renderBar(canvasId) {
+                var el = document.getElementById(canvasId);
+                if (!el) return;
+                var labels = JSON.parse(el.dataset.labels || '[]');
+                var values = JSON.parse(el.dataset.values || '[]');
+                new Chart(el, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: 'rgba(13,110,253,0.6)',
+                            borderColor: 'rgba(13,110,253,1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
+
+            renderBar('hour-histogram');
+            renderBar('duration-histogram');
+            renderBar('deadline-histogram');
+            renderBar('score-distribution');
+        })();
+    </script>
+}

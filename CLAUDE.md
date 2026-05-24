@@ -168,6 +168,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `ImportResult` (import aggregate result) | `src/Application/Common/ImportResult.cs` |
 | `ImportRowResult` (per-row import result) | `src/Application/Common/ImportRowResult.cs` |
 | `MatchSolvesProcessor` (shared match logic) | `src/Application/Common/MatchSolvesProcessor.cs` |
+| `StreakCalculator` (shared solve/win streak logic) | `src/Application/Common/StreakCalculator.cs` |
 | `RoundClock` (round timing in configured league TZ) | `src/Application/Common/RoundClock.cs` |
 | `RoundFinalizationOptions` (TZ + cron schedule config) | `src/Application/Common/RoundFinalizationOptions.cs` |
 | `ScrambleDto` (scramble data transfer) | `src/Application/Queries/Rounds/GetScrambles/ScrambleDto.cs` |
@@ -192,6 +193,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `ILeagueSeasonStandingRepository` | `src/Application/Abstractions/Repositories/ILeagueSeasonStandingRepository.cs` |
 | `IUserRepository` | `src/Application/Abstractions/Repositories/IUserRepository.cs` |
 | `IPlayerRankingRepository` | `src/Application/Abstractions/Repositories/IPlayerRankingRepository.cs` |
+| `IStatisticsRepository` (global statistics projections) | `src/Application/Abstractions/Repositories/IStatisticsRepository.cs` |
 
 ### Application — commands (write operations, by feature)
 
@@ -230,6 +232,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | User match history | `src/Application/Queries/Users/GetMatchHistory/` |
 | User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
 | User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
+| Global statistics summary + 8 chart/record/streak queries | `src/Application/Queries/Statistics/` |
 
 ### Infrastructure
 
@@ -276,6 +279,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
 | User profile | `src/Web/Pages/Users/UserProfile.cshtml[.cs]` |
 | Self-service result submission | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
+| Global statistics page | `src/Web/Pages/Statistics/Statistics.cshtml[.cs]` |
+| Shared stat tile partial (icon + text card) | `src/Web/Pages/Shared/_StatTile.cshtml` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 3 guidelines (current) | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 2 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason2.cshtml[.cs]` |

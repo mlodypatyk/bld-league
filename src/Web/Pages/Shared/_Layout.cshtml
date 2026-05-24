@@ -21,6 +21,9 @@
     <!-- Page-specific CSS -->
     @await RenderSectionAsync("Styles", required: false)
 
+    <!-- Page-specific head scripts (e.g. Chart.js on the Statistics page) -->
+    @await RenderSectionAsync("HeadScripts", required: false)
+
     <script>
         (function () {
             const savedTheme = localStorage.getItem("bsTheme") || "dark";

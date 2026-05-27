@@ -2,26 +2,27 @@ namespace BldLeague.Web.Helpers;
 
 public static class LeagueColorHelper
 {
-    private const string Fallback = "var(--bs-secondary)";
+    private const string FallbackBg = "var(--bs-secondary)";
+    private const string FallbackText = "text-white";
 
-    private static readonly string[] Palette =
+    private static readonly (string Bg, string TextClass)[] Palette =
     [
-        "var(--bs-primary)",
-        "var(--bs-success)",
-        "var(--bs-danger)",
-        "var(--bs-warning)",
-        "#ed8257",
-        "var(--bs-purple)",
+        ("var(--bs-primary)", "text-white"),
+        ("var(--bs-success)", "text-white"),
+        ("var(--bs-danger)", "text-white"),
+        ("var(--bs-warning)", "text-dark"),
+        ("#ed8257", "text-dark"),
+        ("var(--bs-purple)", "text-white"),
     ];
 
-    public static string GetBackgroundColor(string? leagueIdentifier)
+    public static (string Background, string TextClass) GetTileColors(string? leagueIdentifier)
     {
         if (string.IsNullOrEmpty(leagueIdentifier))
-            return Fallback;
+            return (FallbackBg, FallbackText);
 
         var first = char.ToUpperInvariant(leagueIdentifier[0]);
         if (first < 'A' || first > 'Z')
-            return Fallback;
+            return (FallbackBg, FallbackText);
 
         return Palette[(first - 'A') % Palette.Length];
     }

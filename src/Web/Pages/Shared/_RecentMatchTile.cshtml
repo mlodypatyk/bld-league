@@ -1,6 +1,6 @@
 @model BldLeague.Application.Queries.Matches.GetRecentFinishedMatches.RecentMatchDto
 @{
-    var leagueColor = LeagueColorHelper.GetBackgroundColor(Model.LeagueIdentifier);
+    var (leagueBg, leagueTextClass) = LeagueColorHelper.GetTileColors(Model.LeagueIdentifier);
     var leagueLetter = string.IsNullOrEmpty(Model.LeagueIdentifier)
         ? string.Empty
         : char.ToUpperInvariant(Model.LeagueIdentifier[0]).ToString();
@@ -17,8 +17,8 @@
 <a asp-page="/Matches/ViewMatch" asp-route-id="@Model.MatchId" class="text-decoration-none">
     <div class="card h-100 border-0 shadow-sm p-3">
         <div class="d-flex align-items-stretch gap-3">
-            <div class="d-flex align-items-center justify-content-center fw-bold text-white rounded flex-shrink-0"
-                 style="width: 1.75rem; height: 1.75rem; background-color: @leagueColor; font-size: 0.85rem;">
+            <div class="d-flex align-items-center justify-content-center fw-bold @leagueTextClass rounded flex-shrink-0"
+                 style="width: 1.75rem; height: 1.75rem; background-color: @leagueBg; font-size: 0.85rem;">
                 @leagueLetter
             </div>
             <div class="flex-grow-1" style="min-width: 0;">
@@ -39,7 +39,6 @@
                     </div>
                 }
                 <div class="mt-2 d-flex gap-1">
-                    <span class="badge bg-light text-dark">Sezon @Model.SeasonNumber</span>
                     <span class="badge @roundBadgeClass">Kolejka @Model.RoundNumber</span>
                 </div>
             </div>

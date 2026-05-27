@@ -268,6 +268,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
 | `PageModelExtensions` (signed-in user league resolution) | `src/Web/Helpers/PageModelExtensions.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
+| `LeagueColorHelper` (A–F cycle through icon colors) | `src/Web/Helpers/LeagueColorHelper.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
 
